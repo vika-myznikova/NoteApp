@@ -19,7 +19,7 @@ class RegistrationWindow(QWidget):
 
         # Заголовок
         title = QLabel("Создайте аккаунт")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title.setStyleSheet("font-size: 20px; font-weight: bold; color: black")
         layout.addWidget(title)
 
         # Поля ввода
