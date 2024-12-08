@@ -30,4 +30,5 @@ def create_tables():
     Base.metadata.create_all(engine)
     print("База данных и таблица созданы успешно.")
 
+# Создание таблицы в бд, расскомментить функцию и запустить скрипт
 # create_tables()
