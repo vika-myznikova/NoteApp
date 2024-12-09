@@ -6,6 +6,10 @@ from PyQt6.QtWidgets import (
     QPushButton, QMessageBox, QTextEdit, QListWidget, QHBoxLayout
 )
 
+from db.note_repo import get_all_user_notes, create_note
+from db.user_repo import create_user, get_user
+
+USER_ID = None
 
 class RegistrationWindow(QWidget):
     def __init__(self, users_db):
@@ -112,7 +116,8 @@ class RegistrationWindow(QWidget):
         if username in self.users_db:
             QMessageBox.warning(self, "Ошибка", "Пользователь с таким именем уже существует.")
         else:
-            self.users_db[username] = password  # Сохранение данных
+            new_user = create_user(username=username, password=password)  # Сохранение данных
+            USER_ID = new_user.id
             QMessageBox.information(self, "Успех", "Регистрация прошла успешно!")
             self.close()
             self.main_window = MainWindow()  # Создание основного окна
@@ -136,17 +141,17 @@ class LoginWindow(QWidget):
         layout = QVBoxLayout()
 
         title = QLabel("Вход в систему")
-        title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title.setStyleSheet("font-size: 20px; font-weight: bold; color: black;")
         layout.addWidget(title)
 
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Имя пользователя")
-        self.username_input.setStyleSheet("padding: 10px; border: 1px solid #CCCCCC; border-radius: 5px;")
+        self.username_input.setStyleSheet("padding: 10px; border: 1px solid #CCCCCC; border-radius: 5px; color: black;")
 
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_input.setPlaceholderText("Пароль")
-        self.password_input.setStyleSheet("padding: 10px; border: 1px solid #CCCCCC; border-radius: 5px;")
+        self.password_input.setStyleSheet("padding: 10px; border: 1px solid #CCCCCC; border-radius: 5px; color: black;")
 
         self.login_button = QPushButton("Войти")
         self.login_button.setStyleSheet("""
@@ -185,7 +190,8 @@ class LoginWindow(QWidget):
             QMessageBox.warning(self, "Ошибка", "Пожалуйста, заполните все поля.")
             return  # Выход если поля пустые
 
-        if username in self.users_db and self.users_db[username] == password:
+        if user := get_user(username=username, password=password):
+            USER_ID = user.id
             QMessageBox.information(self, "Успех", "Вы успешно вошли в систему!")
             self.close()
             self.main_window = MainWindow()  # Создание окна
@@ -282,7 +288,7 @@ class MainWindow(QWidget):
         self.setWindowTitle("Заметки")
         self.setGeometry(400, 400, 400, 600)
         self.setStyleSheet("background-color: #F7F7F7; font-family: Arial;")
-        self.notes = []  # Список
+        self.notes = get_all_user_notes(USER_ID)  # Список
 
         layout = QVBoxLayout()
 
@@ -293,7 +299,7 @@ class MainWindow(QWidget):
 
         # Заметки
         self.notes_list = QListWidget()
-        self.notes_list.setStyleSheet("border: none; padding: 5px;")
+        self.notes_list.setStyleSheet("border: none; padding: 5px; color: black;")
         self.notes_list.itemDoubleClicked.connect(self.edit_note)  # Редактирование
         layout.addWidget(self.notes_list)
 
@@ -325,7 +331,7 @@ class MainWindow(QWidget):
         self.note_editor.show()
 
     def add_note(self, title, content):
-        self.notes.append((title, content))
+        create_note(title=title, content=content, user_id=USER_ID)
         self.notes_list.addItem(title)  # Добавление заголовка
 
     def update_note(self, title, content):

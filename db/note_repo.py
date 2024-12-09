@@ -15,5 +15,5 @@ def get_all_user_notes(user_id: int):
     return notes_list
 
 # Примеры
-# evgen_note = create_note("my note title", "content maker", 1)
+# evgen_note = create_note("my note title", "content maker", 3)
 # notes = get_all_user_notes(1)

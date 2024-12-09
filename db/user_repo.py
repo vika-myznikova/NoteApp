@@ -6,6 +6,7 @@ def create_user(username: str, password: str):
     new_user = User(username=username, password=password)
     session.add(new_user)
     session.commit()
+    return new_user
 
 # Получить пользователя
 def get_user(username: str, password: str):
@@ -17,5 +18,5 @@ def get_user(username: str, password: str):
 
 # Примеры использвания
 # i = get_user("evgen", "279823")
-# c = create_user("valera", "ga21sz")
-# ii = get_user("valera", "ga21sz")
+# c = create_user("valeraa", "ga21sza")
+# ii = get_user("valeraa", "ga21sza")
