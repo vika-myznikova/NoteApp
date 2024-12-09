@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 )
 
 from db.note_repo import get_all_user_notes, create_note
+from db.session_repo import create_session, get_session
 from db.user_repo import create_user, get_user
 
 USER_ID = None
@@ -117,7 +118,7 @@ class RegistrationWindow(QWidget):
             QMessageBox.warning(self, "Ошибка", "Пользователь с таким именем уже существует.")
         else:
             new_user = create_user(username=username, password=password)  # Сохранение данных
-            USER_ID = new_user.id
+            create_session(user_id=new_user.id)
             QMessageBox.information(self, "Успех", "Регистрация прошла успешно!")
             self.close()
             self.main_window = MainWindow()  # Создание основного окна
@@ -191,7 +192,7 @@ class LoginWindow(QWidget):
             return  # Выход если поля пустые
 
         if user := get_user(username=username, password=password):
-            USER_ID = user.id
+            create_session(user_id=user.id)
             QMessageBox.information(self, "Успех", "Вы успешно вошли в систему!")
             self.close()
             self.main_window = MainWindow()  # Создание окна
@@ -288,7 +289,7 @@ class MainWindow(QWidget):
         self.setWindowTitle("Заметки")
         self.setGeometry(400, 400, 400, 600)
         self.setStyleSheet("background-color: #F7F7F7; font-family: Arial;")
-        self.notes = get_all_user_notes(USER_ID)  # Список
+        self.notes = get_all_user_notes(get_session().user_id)  # Список
 
         layout = QVBoxLayout()
 

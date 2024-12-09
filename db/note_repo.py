@@ -6,6 +6,7 @@ def create_note(title: str, content:str, user_id: int):
     new_note = Note(title=title, content=content, user_id=user_id)
     session.add(new_note)
     session.commit()
+    return new_note
 
 # Получаем все заметки пользователя по айди пользователя
 def get_all_user_notes(user_id: int):
