@@ -332,7 +332,8 @@ class MainWindow(QWidget):
         self.note_editor.show()
 
     def add_note(self, title, content):
-        create_note(title=title, content=content, user_id=USER_ID)
+        user_id = get_session().user_id
+        create_note(title=title, content=content, user_id=user_id)
         self.notes_list.addItem(title)  # Добавление заголовка
 
     def update_note(self, title, content):
