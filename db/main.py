@@ -12,6 +12,7 @@ from db.user_repo import create_user, get_user
 
 USER_ID = None
 
+
 class RegistrationWindow(QWidget):
     def __init__(self, users_db):
         super().__init__()
@@ -319,6 +320,15 @@ class MainWindow(QWidget):
 
         self.setLayout(layout)
 
+        self.load_notes()
+
+    def load_notes(self):
+        account = get_session().user_id
+        self.notes = get_all_user_notes(account)
+        self.notes_list.clear()
+        for note in self.notes:
+            self.notes_list.addItem(note.title)
+
     def new_note(self):
         self.open_note_editor(("", ""), self.add_note)
 
@@ -335,6 +345,7 @@ class MainWindow(QWidget):
         user_id = get_session().user_id
         create_note(title=title, content=content, user_id=user_id)
         self.notes_list.addItem(title)  # Добавление заголовка
+        self.load_notes()
 
     def update_note(self, title, content):
         note_index = self.notes_list.currentRow()
@@ -353,4 +364,3 @@ if __name__ == "__main__":
     registration_window = RegistrationWindow(users_db)
     registration_window.show()  # Показать окно
     sys.exit(app.exec())
-
