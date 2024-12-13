@@ -333,9 +333,7 @@ class MainWindow(QWidget):
         self.open_note_editor(("", ""), self.add_note)
 
     def edit_note(self, item):
-        note_index = self.notes_list.currentRow()
-        note = self.notes[note_index]
-        self.open_note_editor(note, self.update_note)
+        self.open_note_editor(('', ''), self.update_note)
 
     def open_note_editor(self, note, on_save):
         self.note_editor = NoteEditorWindow(note, on_save, lambda: self.delete_note(self.notes_list.currentRow()))
@@ -347,7 +345,7 @@ class MainWindow(QWidget):
         self.notes_list.addItem(title)  # Добавление заголовка
         self.load_notes()
 
-    def update_note(self, title, content):
+    def update_note(self, title='', content=''):
         note_index = self.notes_list.currentRow()
         self.notes[note_index] = (title, content)
         self.notes_list.currentItem().setText(title)  # Обновление заголовка
@@ -356,6 +354,7 @@ class MainWindow(QWidget):
         if 0 <= index < len(self.notes):
             del self.notes[index]
             self.notes_list.takeItem(index)  # Удаление из списка
+        return index
 
 
 if __name__ == "__main__":
