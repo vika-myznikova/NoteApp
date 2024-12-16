@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QMessageBox, QTextEdit, QListWidget, QHBoxLayout
 )
 
-from db.note_repo import get_all_user_notes, create_note
+from db.note_repo import get_all_user_notes, create_note, get_note_by_id, update_note, delete_note
 from db.session_repo import create_session, get_session
 from db.user_repo import create_user, get_user
 
@@ -86,10 +86,12 @@ class RegistrationWindow(QWidget):
 
         # Проверка
         if re.search(
-                r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-\U0001F77F\U0001F900-\U0001F9FF]',
+                r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-'
+                r'\U0001F77F\U0001F900-\U0001F9FF]',
                 username) or \
                 re.search(
-                    r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-\U0001F77F\U0001F900-\U0001F9FF]',
+                    r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F700-'
+                    r'\U0001F77F\U0001F900-\U0001F9FF]',
                     password):
             QMessageBox.warning(self, "Ошибка", "Смайлы и эмодзи не допускаются в логине и пароле.")
             return
@@ -197,7 +199,6 @@ class LoginWindow(QWidget):
             QMessageBox.information(self, "Успех", "Вы успешно вошли в систему!")
             self.close()
             self.main_window = MainWindow()  # Создание окна
-
             self.main_window.show()  # Открытие окна
         else:
             QMessageBox.warning(self, "Ошибка", "Неверное имя пользователя или пароль.")
@@ -333,7 +334,13 @@ class MainWindow(QWidget):
         self.open_note_editor(("", ""), self.add_note)
 
     def edit_note(self, item):
-        self.open_note_editor(('', ''), self.update_note)
+        note_index = self.notes_list.currentRow()
+        if 0 <= note_index < len(self.notes):
+            note_id = self.notes[note_index].id
+            note = get_note_by_id(note_id)
+            if note:
+                self.open_note_editor((note.title, note.content),
+                                      lambda title, content: self.update_note(note_index, title, content))
 
     def open_note_editor(self, note, on_save):
         self.note_editor = NoteEditorWindow(note, on_save, lambda: self.delete_note(self.notes_list.currentRow()))
@@ -345,16 +352,20 @@ class MainWindow(QWidget):
         self.notes_list.addItem(title)  # Добавление заголовка
         self.load_notes()
 
-    def update_note(self, title='', content=''):
-        note_index = self.notes_list.currentRow()
-        self.notes[note_index] = (title, content)
-        self.notes_list.currentItem().setText(title)  # Обновление заголовка
+    def update_note(self, note_index, title, content):
+        if 0 <= note_index < len(self.notes):
+            note_id = self.notes[note_index].id
+            update_note(note_id, title, content)
+            self.notes[note_index].title = title
+            self.notes[note_index].content = content
+            self.notes_list.item(note_index).setText(title)
 
     def delete_note(self, index):
         if 0 <= index < len(self.notes):
+            note_id = self.notes[index].id
+            delete_note(note_id)
             del self.notes[index]
-            self.notes_list.takeItem(index)  # Удаление из списка
-        return index
+            self.load_notes()
 
 
 if __name__ == "__main__":
