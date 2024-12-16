@@ -35,9 +35,16 @@ def update_note(note_id: int , title: str, content: str):
     note.content = content
     session.commit()
 
+def get_note_by_id(note_id: int):
+    note = session.query(Note).filter_by(
+        id=note_id,
+    ).one_or_none()
+    return note
+
 # Примеры
 # evgen_note = create_note("my note title", "content maker", 3)
 # notes = get_all_user_notes(3)
 # update_note(1, title="111", content="222")
 # delete_note(2)
 # print(notes)
+# note = get_note_by_id(3)
