@@ -12,6 +12,7 @@ from db.user_repo import create_user, get_user
 
 USER_ID = None
 
+
 class RegistrationWindow(QWidget):
     def __init__(self, users_db):
         super().__init__()
@@ -319,13 +320,20 @@ class MainWindow(QWidget):
 
         self.setLayout(layout)
 
+        self.load_notes()
+
+    def load_notes(self):
+        account = get_session().user_id
+        self.notes = get_all_user_notes(account)
+        self.notes_list.clear()
+        for note in self.notes:
+            self.notes_list.addItem(note.title)
+
     def new_note(self):
         self.open_note_editor(("", ""), self.add_note)
 
     def edit_note(self, item):
-        note_index = self.notes_list.currentRow()
-        note = self.notes[note_index]
-        self.open_note_editor(note, self.update_note)
+        self.open_note_editor(('', ''), self.update_note)
 
     def open_note_editor(self, note, on_save):
         self.note_editor = NoteEditorWindow(note, on_save, lambda: self.delete_note(self.notes_list.currentRow()))
@@ -335,8 +343,9 @@ class MainWindow(QWidget):
         user_id = get_session().user_id
         create_note(title=title, content=content, user_id=user_id)
         self.notes_list.addItem(title)  # Добавление заголовка
+        self.load_notes()
 
-    def update_note(self, title, content):
+    def update_note(self, title='', content=''):
         note_index = self.notes_list.currentRow()
         self.notes[note_index] = (title, content)
         self.notes_list.currentItem().setText(title)  # Обновление заголовка
@@ -345,6 +354,7 @@ class MainWindow(QWidget):
         if 0 <= index < len(self.notes):
             del self.notes[index]
             self.notes_list.takeItem(index)  # Удаление из списка
+        return index
 
 
 if __name__ == "__main__":
@@ -353,4 +363,3 @@ if __name__ == "__main__":
     registration_window = RegistrationWindow(users_db)
     registration_window.show()  # Показать окно
     sys.exit(app.exec())
-
